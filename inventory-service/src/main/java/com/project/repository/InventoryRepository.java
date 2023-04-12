@@ -8,4 +8,5 @@ import com.project.model.Inventory;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 	Inventory findByProductId(String productId);
+	Inventory findBySkuCode(String skuCode);
 }

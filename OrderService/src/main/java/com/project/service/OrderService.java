@@ -2,6 +2,7 @@ package com.project.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.project.dto.request.OrderItemRequest;
 import com.project.dto.request.OrderRequest;
+import com.project.dto.response.InventoryResponse;
 import com.project.dto.response.OrderResponse;
 import com.project.model.Order;
 import com.project.model.OrderItem;
@@ -43,25 +45,24 @@ public class OrderService {
 
 	}
 
-	private OrderItem mapToOrderItem(OrderItemRequest itemRequest) {
-		
-		
+//
+	private OrderItem mapToOrderItem(InventoryResponse itemResponse) {
 		return OrderItem.builder()
-				.price(itemRequest.getPrice())
-				.product(itemRequest.getProduct())
-				.quantity(itemRequest.getQuantity())
+				.price(itemResponse.getPrice())
+				.quantity(itemResponse.getQuantity())
+				.skuCode(itemResponse.getSku())
 				.build();
 
 	}
 
-	private BigDecimal calculateTotal(List<OrderItemRequest> orderItems) {
-		float total = 0;
+	private BigDecimal calculateTotal(List<OrderItem> orderItems) {
+		BigDecimal total = new BigDecimal(0);
 		if (!orderItems.isEmpty() || orderItems != null) {
-			for (OrderItemRequest items : orderItems) {
-				total += items.getPrice() * items.getQuantity();
+			for (OrderItem items : orderItems) {
+				total = total.add(items.getPrice().multiply(BigDecimal.valueOf(items.getQuantity())));
 			}
 		}
-		return new BigDecimal(total);
+		return total;
 	}
 
 	public void placeOrder(OrderRequest request) {
@@ -71,26 +72,23 @@ public class OrderService {
 
 		} while (orderRepository.findFirstByOrderNumber(uuid) != null);
 
-		Order order = Order.builder()
-				.orderNumber(uuid)
-				.totalAmount(calculateTotal(request.getOrderItems()))
-				.createDate(LocalDateTime.now())
-				.build();
+		Order order = Order.builder().orderNumber(uuid).createDate(LocalDateTime.now()).build();
 
 		if (request.getOrderItems() == null || request.getOrderItems().isEmpty()) {
 			log.info("--->No product Order not save");
 			return;
 		}
-		boolean allIsInStock = client.build()
+		InventoryResponse[] inventoryResponseArray = client.build()
 				.post()
-				.uri("http://localhost:8080/api/inventory")
+				.uri("http://inventory-service/api/inventory")
 				.body(Mono.just(request), OrderRequest.class)
 				.retrieve()
-				.bodyToMono(Boolean.class)
+				.bodyToMono(InventoryResponse[].class)
 				.block();
 
-		if (allIsInStock) {
-			order.setOrderItems(request.getOrderItems().stream().map(this::mapToOrderItem).toList());
+		if (inventoryResponseArray != null) {
+			order.setOrderItems(Arrays.stream(inventoryResponseArray).map(this::mapToOrderItem).toList());
+			order.setTotalAmount(calculateTotal(order.getOrderItems()));
 			orderRepository.save(order);
 			log.info("--->Order saved");
 		} else {

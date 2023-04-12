@@ -26,37 +26,37 @@ import lombok.RequiredArgsConstructor;
 public class CatalogController {
 	private final CatalogService catalogService;
 
-	@PostMapping	
-	public ResponseEntity<Void> createCatalog(@RequestBody CatalogRequest request) {
+	@PostMapping
+	public ResponseEntity<String> createCatalog(@RequestBody CatalogRequest request) {
 		try {
 			catalogService.createCatelog(request);
-			return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (Exception e) {			
+			return new ResponseEntity<String>("Catalog added", HttpStatus.CREATED);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@GetMapping
-	public ResponseEntity<List<CatalogResponse>> getAllCatalog() {		
+	public ResponseEntity<List<CatalogResponse>> getAllCatalog() {
 		try {
 			List<CatalogResponse> catalogs = catalogService.findAllCatalogs();
-			if(catalogs.isEmpty()) {
+			if (catalogs.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 			return new ResponseEntity<>(catalogs, HttpStatus.OK);
-		} catch (Exception e) {			
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<CatalogResponse> getCatalogById(@PathVariable String id) {
 		try {
 			CatalogResponse catalog = catalogService.findCatalogById(id);
-			if(catalog == null) {
+			if (catalog == null) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(catalog, HttpStatus.OK);
@@ -64,53 +64,53 @@ public class CatalogController {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateCatalog(@RequestBody CatalogRequest request, @PathVariable String id) {
+	public ResponseEntity<String> updateCatalog(@RequestBody CatalogRequest request, @PathVariable String id) {
 		try {
 			CatalogResponse catalog = catalogService.updateCatelog(id, request);
-			if(catalog == null) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}			
-			return new ResponseEntity<>(HttpStatus.OK);
+			if (catalog == null) {
+				return new ResponseEntity<String>("Catalog not found", HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<String>("Catalog updated", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@DeleteMapping("/{id}")	
-	public ResponseEntity<Void> deleteCatalogById(@PathVariable String id) {
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteCatalogById(@PathVariable String id) {
 		try {
 			CatalogResponse catalog = catalogService.deleteCatelogById(id);
-			if(catalog == null) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}			
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			if (catalog == null) {
+				return new ResponseEntity<String>("Catalog not found", HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<String>("Catalog deleted", HttpStatus.NO_CONTENT);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 	@GetMapping("/{id}/products")
 	public ResponseEntity<List<Product>> getCatalogProducts(@PathVariable(name = "id") String catalogId) {
-		try {			
+		try {
 			List<Product> lst = catalogService.getCatalogProducts(catalogId);
-			return new ResponseEntity<>(lst, HttpStatus.OK); 
+			return new ResponseEntity<>(lst, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	
 	@PostMapping("/{id}/products")
 	public ResponseEntity<Void> addProduct(@PathVariable(name = "id") String catalogId, @RequestBody Product product) {
 		try {
 			catalogService.addProduct(catalogId, product);
-			return new ResponseEntity<>(HttpStatus.OK); 
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -121,7 +121,7 @@ public class CatalogController {
 	public ResponseEntity<Void> deleteProduct(@PathVariable String catalogId, @PathVariable String productId) {
 		try {
 			catalogService.deleteProduct(catalogId, productId);
-			return new ResponseEntity<>(HttpStatus.OK); 
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

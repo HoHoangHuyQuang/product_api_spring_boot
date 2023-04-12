@@ -26,13 +26,13 @@ public class OrderController {
 	private final OrderService orderService;
 	
 	@PostMapping	
-	public ResponseEntity<Void> createOrder(@RequestBody OrderRequest request) {
+	public ResponseEntity<String> createOrder(@RequestBody OrderRequest request) {
 		try {
 			orderService.placeOrder(request);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return new ResponseEntity<String>("New order placed", HttpStatus.CREATED);
 		} catch (Exception e) {			
 			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	@GetMapping

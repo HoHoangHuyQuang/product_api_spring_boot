@@ -1,5 +1,7 @@
 package com.project.model;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,4 +26,7 @@ public class Inventory {
 	private long id;	
 	private String productId;
 	private Integer quantity;
+	private String skuCode;
+	private BigDecimal price;
+	
 }

@@ -1,5 +1,5 @@
 .project
-.setting
+/.setting/
 
 target/
 !.mvn/wrapper/maven-wrapper.jar

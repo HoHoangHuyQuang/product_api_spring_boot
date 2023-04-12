@@ -26,22 +26,23 @@ import lombok.RequiredArgsConstructor;
 public class ProductController {
 	@Autowired
 	private final ProductService productService;
-	
-	@PostMapping	
-	public ResponseEntity<Void> createProduct(@RequestBody ProductRequest request) {
+
+	@PostMapping
+	public ResponseEntity<String> createProduct(@RequestBody ProductRequest request) {
 		try {
 			productService.createProduct(request);
-			return new ResponseEntity<>(HttpStatus.CREATED);
-		} catch (Exception e) {			
+			return new ResponseEntity<String>("New product added", HttpStatus.CREATED);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@GetMapping	
+
+	@GetMapping
 	public ResponseEntity<List<ProductResponse>> getAllProducts() {
 		try {
 			List<ProductResponse> products = productService.findAllProducts();
-			if(products.isEmpty()) {
+			if (products.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 			return new ResponseEntity<>(products, HttpStatus.OK);
@@ -50,44 +51,46 @@ public class ProductController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<ProductResponse> getProductById(@PathVariable String id) {
 		try {
 			ProductResponse product = productService.findProductById(id);
-			if(product == null) {
+			if (product == null) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(product, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}		
-	}
-	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateProduct(@RequestBody ProductRequest request, @PathVariable String id) {
-		try {
-			ProductResponse product = productService.updateProduct(id, request);
-			if(product == null) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}			
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@DeleteMapping("/{id}")	
-	public ResponseEntity<Void> deleteCatalogById(@PathVariable String id) {
+
+	@PutMapping("/{id}")
+	public ResponseEntity<String> updateProduct(@RequestBody ProductRequest request, @PathVariable String id) {
 		try {
-			ProductResponse product = productService.deleteProductById(id);
-			if(product == null) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}			
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			ProductResponse product = productService.updateProduct(id, request);
+			if (product == null) {
+				return new ResponseEntity<String>("Product not found", HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<String>("Product updated", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteProductById(@PathVariable String id) {
+		try {
+			ProductResponse product = productService.deleteProductById(id);
+			if (product == null) {
+				return new ResponseEntity<String>("Product not found", HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<String>("Product deleted", HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

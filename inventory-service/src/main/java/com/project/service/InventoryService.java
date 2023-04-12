@@ -28,14 +28,12 @@ public class InventoryService {
 	private final InventoryRepository inventoryRepository;
 	private final WebClient.Builder client;
 
-
-
 	public void addToStock(InventoryRequest request) {
 		// bool check if get id return is Ok
 		String productId = request.getProductId();
 		Boolean result = client.build()
 				.get()
-				.uri("http://localhost:8080/api/products/{productId}", productId)
+				.uri("http://product-service/api/products/{productId}", productId)
 				.exchangeToMono(response -> {
 					if (response.statusCode().is2xxSuccessful()) {
 						return Mono.just(true);
@@ -50,6 +48,8 @@ public class InventoryService {
 			Inventory stock = inventoryRepository.findByProductId(request.getProductId());
 			if (stock != null) {
 				stock.setQuantity(stock.getQuantity() + request.getQuantity());
+				stock.setPrice(request.getPrice());
+				stock.setSkuCode(request.getSkuCode());
 				inventoryRepository.save(stock);
 				log.info("--> Stock of {} added", request.getProductId());
 				return;
@@ -58,6 +58,8 @@ public class InventoryService {
 				Inventory newStock = Inventory.builder()
 						.productId(request.getProductId())
 						.quantity(request.getQuantity())
+						.skuCode(request.getSkuCode())
+						.price(request.getPrice())
 						.build();
 				inventoryRepository.save(newStock);
 				log.info("--> New stock {} added", request.getProductId());
@@ -72,7 +74,7 @@ public class InventoryService {
 	@SneakyThrows
 	public boolean isInStock(OrderRequest requests) {
 		for (OrderItemRequest re : requests.getOrderItems()) {
-			Inventory item = inventoryRepository.findByProductId(re.getProduct());
+			Inventory item = inventoryRepository.findBySkuCode(re.getSkuCode());
 			if (item == null) {
 				return false;
 			}
@@ -83,5 +85,33 @@ public class InventoryService {
 			inventoryRepository.save(item);
 		}
 		return true;
+	}
+
+	@Transactional
+	@SneakyThrows
+	public List<InventoryResponse> withdrawStock(OrderRequest requests) {
+		log.info("Checking Inventory");
+		List<InventoryResponse> lst = new ArrayList<>();
+		for (OrderItemRequest re : requests.getOrderItems()) {
+			Inventory item = inventoryRepository.findBySkuCode(re.getSkuCode());
+			if (item == null) {
+				log.info("---> Product not found");
+				return null;
+			}
+			if (item.getQuantity() < re.getQuantity()) {
+				log.info("---> Product {} is out of stock", item.getSkuCode());
+				return null;
+			}
+			
+			item.setQuantity(item.getQuantity() - re.getQuantity());
+			inventoryRepository.save(item);
+
+			lst.add(InventoryResponse.builder()
+					.price(item.getPrice())
+					.skuCode(item.getSkuCode())
+					.quantity(re.getQuantity())
+					.build());
+		}
+		return lst;
 	}
 }

@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class OrderRequest {
-
 	private List<OrderItemRequest> orderItems;
 }
