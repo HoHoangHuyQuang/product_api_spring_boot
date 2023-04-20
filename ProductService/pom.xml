@@ -5,7 +5,7 @@
 		<artifactId>fashion-microservices</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>product-service</artifactId>
+	<artifactId>ProductService</artifactId>
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>18</java.version>

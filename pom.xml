@@ -15,8 +15,8 @@
 		<spring-cloud.version>2021.0.6</spring-cloud.version>
 	</properties>
 	<modules>
-		<module>product-service</module>
-		<module>inventory-service</module>
+		<module>ProductService</module>
+		<module>InventoryService</module>
 		<module>OrderService</module>
 		<module>DiscoveryServer</module>
 		<module>ApiGateway</module>

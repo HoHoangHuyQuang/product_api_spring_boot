@@ -5,8 +5,8 @@
 		<artifactId>fashion-microservices</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>inventory-service</artifactId>
-	<name>inventory-service</name>
+	<artifactId>InventoryService</artifactId>
+	<name>InventoryService</name>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
