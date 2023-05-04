@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.project.dto.request.OrderItemRequest;
 import com.project.dto.request.OrderRequest;
 import com.project.dto.response.InventoryResponse;
 import com.project.dto.response.OrderResponse;
@@ -101,6 +100,10 @@ public class OrderService {
 		return orders.stream().map(this::mapToOrderResponse).toList();
 	}
 
+	public OrderResponse findByOrderNumber(String orderNumber) {
+		return mapToOrderResponse(orderRepository.findFirstByOrderNumber(orderNumber));
+	}
+
 	public OrderResponse findOrderById(long id) {
 		Optional<Order> order = orderRepository.findById(id);
 		if (order.isPresent()) {
@@ -110,22 +113,37 @@ public class OrderService {
 		return null;
 	}
 
-	public void updateOrder(String id, OrderRequest request) {
-
+	public void deleteOrder(String orderNumber) {
+		Order order = orderRepository.findFirstByOrderNumber(orderNumber);
+		if (order == null) {
+			log.info("--->Order {} not found", orderNumber);
+			return;
+		}
+		orderRepository.delete(order);
+		log.info("--->Order {} deleted", orderNumber);
 	}
 
-	public void deleteOrder(String id) {
-
-	}
-
-	public void addOrderItem(OrderItem orderItem, Long orderId) {
+	public void addOrderItem(OrderRequest request, Long orderId) {
 		Order order = orderRepository.findById(orderId).get();
-		order.getOrderItems().add(orderItem);
+		if (order == null) {
+			return;
+		}
+		InventoryResponse[] inventoryResponseArray = client.build()
+				.post()
+				.uri("http://inventory-service/api/inventory")
+				.body(Mono.just(request), OrderRequest.class)
+				.retrieve()
+				.bodyToMono(InventoryResponse[].class)
+				.block();
 
-		orderRepository.save(order);
+		if (inventoryResponseArray != null) {
+			order.setOrderItems(Arrays.stream(inventoryResponseArray).map(this::mapToOrderItem).toList());
+			order.setTotalAmount(calculateTotal(order.getOrderItems()));
+			orderRepository.save(order);
+			log.info("--->Order saved");
+		} else {
+			throw new IllegalArgumentException("Product is not in stock, please try again later");
+		}
 	}
 
-	public OrderResponse findByOrderNumber(String orderNumber) {
-		return mapToOrderResponse(orderRepository.findFirstByOrderNumber(orderNumber));
-	}
 }

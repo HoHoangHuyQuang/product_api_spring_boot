@@ -20,6 +20,7 @@
 		<module>OrderService</module>
 		<module>DiscoveryServer</module>
 		<module>ApiGateway</module>
+		<module>ExceptionCenter</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -29,7 +30,7 @@
 				<type>pom</type>
 				<version>2.7.10</version>
 				<scope>import</scope>
-			</dependency>
+			</dependency>			
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>

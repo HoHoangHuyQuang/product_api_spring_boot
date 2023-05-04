@@ -2,6 +2,7 @@ package com.project.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.dto.request.CatalogRequest;
 import com.project.dto.response.CatalogResponse;
+import com.project.exception.GlobalExceptionHandler;
 import com.project.model.Product;
 import com.project.service.CatalogService;
 
@@ -24,16 +26,19 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("api/catalogs")
 @RequiredArgsConstructor
 public class CatalogController {
+	@Autowired
 	private final CatalogService catalogService;
-
+	@Autowired
+	private GlobalExceptionHandler globalExceptionHandler;
+	
 	@PostMapping
 	public ResponseEntity<String> createCatalog(@RequestBody CatalogRequest request) {
 		try {
 			catalogService.createCatelog(request);
 			return new ResponseEntity<String>("Catalog added", HttpStatus.CREATED);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>("Some thing went wrong!!!", HttpStatus.INTERNAL_SERVER_ERROR);
+			e.printStackTrace();			
+			return globalExceptionHandler.handleException(e);
 		}
 	}
 
