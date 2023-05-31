@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.project.dto.request.ProductRequest;
@@ -44,14 +48,24 @@ public class ProductService {
 
 	}
 
-	public List<ProductResponse> findAllProducts() {
-		List<Product> products = productRepository.findAll();
-		return products.stream().map(this::mapToProductResponse).toList();
+	public List<ProductResponse> findAllProducts(int pageNo, int pageSize) {
+		Sort sort = Sort.by("id").ascending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		
+		try {
+			Page<Product> products = productRepository.findAll(pageable);
+			return products.getContent().stream().map(this::mapToProductResponse).toList();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+		
+		
 
 	}
 
 	public ProductResponse findProductById(String id) {
-		
+
 		Optional<Product> product = productRepository.findById(id);
 		if (product.isPresent()) {
 			return mapToProductResponse(product.get());

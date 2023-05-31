@@ -8,6 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -95,9 +99,18 @@ public class OrderService {
 		}
 	}
 
-	public List<OrderResponse> findAllOrders() {
-		List<Order> orders = orderRepository.findAll();
-		return orders.stream().map(this::mapToOrderResponse).toList();
+	public List<OrderResponse> findAllOrders(int pageNo, int pageSize) {
+		Sort sort = Sort.by("id").ascending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+		try {
+			Page<Order> orders = orderRepository.findAll(pageable);
+			return orders.getContent().stream().map(this::mapToOrderResponse).toList();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+
 	}
 
 	public OrderResponse findByOrderNumber(String orderNumber) {

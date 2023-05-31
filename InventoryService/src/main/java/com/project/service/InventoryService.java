@@ -70,23 +70,6 @@ public class InventoryService {
 		return;
 	}
 
-//	@Transactional
-//	@SneakyThrows
-//	public boolean isInStock(OrderRequest requests) {
-//		for (OrderItemRequest re : requests.getOrderItems()) {
-//			Inventory item = inventoryRepository.findBySkuCode(re.getSkuCode());
-//			if (item == null) {
-//				return false;
-//			}
-//			if (item.getQuantity() < re.getQuantity()) {
-//				return false;
-//			}
-//			item.setQuantity(item.getQuantity() - re.getQuantity());
-//			inventoryRepository.save(item);
-//		}
-//		return true;
-//	}
-
 	@Transactional
 	@SneakyThrows
 	public List<InventoryResponse> withdrawStock(OrderRequest requests) {
@@ -102,7 +85,7 @@ public class InventoryService {
 				log.info("---> Product {} is out of stock", item.getSkuCode());
 				return null;
 			}
-			
+
 			item.setQuantity(item.getQuantity() - re.getQuantity());
 			inventoryRepository.save(item);
 
